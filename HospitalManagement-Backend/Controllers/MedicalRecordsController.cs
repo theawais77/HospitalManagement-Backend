@@ -20,21 +20,30 @@ namespace HospitalManagement_Backend.Controllers
         [HttpGet()]
         public async Task<ActionResult<IEnumerable<MedicalRecord>>> GetMedicalRecords()
         {
-            return await _dbcontext.MedicalRecords.ToListAsync();
+           var medicalRecords = await _dbcontext.MedicalRecords
+                .Include(m => m.Patient)
+                .Include(m => m.Doctor)
+                .ToListAsync();
+            return Ok(medicalRecords);
         }
 
         // GET: api/MedicalRecords/5
         [HttpGet("{id}")]
         public async Task<ActionResult<MedicalRecord>> GetMedicalRecord(int id)
         {
-            var medicalRecord = await _dbcontext.MedicalRecords.FindAsync(id);
+            var medicalRecords = await _dbcontext.MedicalRecords
+                .Include(m => m.Patient)
+                .Include(m => m.Doctor)
+                .FirstOrDefaultAsync(m => m.RecordID == id);
 
-            if (medicalRecord == null)
-            {
+
+            if (medicalRecords == null)
+            { 
                 return NotFound();
-            }
+        }
 
-            return medicalRecord;
+            return medicalRecords;
+
         }
 
         // POST: api/MedicalRecords
