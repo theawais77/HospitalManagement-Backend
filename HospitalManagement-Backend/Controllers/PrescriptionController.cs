@@ -19,7 +19,12 @@ namespace HospitalManagement_Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Prescription>>> GetPrescriptions()
         {
-            var prescriptions = await _dbcontext.Prescriptions.ToListAsync();
+            var prescriptions = await _dbcontext.Prescriptions
+                .Include(p => p.Patient)
+                .Include(p => p.Doctor)
+                .Include(p => p.Medication)
+                .ToListAsync();
+
             return Ok(prescriptions);
         }
 
