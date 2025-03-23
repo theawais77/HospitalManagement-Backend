@@ -26,20 +26,46 @@ namespace HospitalManagement_Backend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Prescription>> GetPrescription(int id)
         {
-            var prescription = await _dbcontext.Prescriptions.FindAsync(id);
-            if (prescription == null)
-            {
-                return NotFound();
-            }
-            return Ok(prescription);
+            var prescription = await _dbcontext.Prescriptions
+                .Include(p => p.Patient)
+                .Include(p => p.Doctor)
+                .Include(p => p.Medication)
+                .FirstOrDefaultAsync(p => p.PrescriptionID == id);
+
+            if (prescription == null) return NotFound();
+            return prescription;
         }
+
         [HttpPost]
-        public async Task<ActionResult<Prescription>> AddPrescription(Prescription prescription)
+        public async Task<ActionResult<Prescription>> CreatePrescription([FromBody] Prescription prescription)
         {
-            _dbcontext.Prescriptions.Add(prescription);
+            var newPrescription = new Prescription
+            {
+                PatientID = prescription.PatientID,
+                DoctorID = prescription.DoctorID,
+                MedicationID = prescription.MedicationID,
+                Dosage = prescription.Dosage,
+                Instructions = prescription.Instructions,
+                PrescribedAt = prescription.PrescribedAt
+            };
+
+            _dbcontext.Prescriptions.Add(newPrescription);
             await _dbcontext.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetPrescription), new { id = prescription.PrescriptionID }, prescription);
+
+            // Load related data
+            await _dbcontext.Entry(newPrescription)
+                .Reference(p => p.Patient)
+                .LoadAsync();
+            await _dbcontext.Entry(newPrescription)
+                .Reference(p => p.Doctor)
+                .LoadAsync();
+            await _dbcontext.Entry(newPrescription)
+                .Reference(p => p.Medication)
+                .LoadAsync();
+
+            return CreatedAtAction(nameof(GetPrescription), new { id = newPrescription.PrescriptionID }, newPrescription);
         }
+
         [HttpPut("id")]
         public async Task<ActionResult<Prescription>> UpdatePrescription(int id, Prescription prescription)
         {

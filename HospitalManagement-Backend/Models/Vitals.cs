@@ -7,9 +7,11 @@ namespace HospitalManagement_Backend.Models
     {
         [Key]
         public int VitalID { get; set; }
-        public int PatientID { get; set; }
+        [ForeignKey("PatientID")]
+        public int? PatientID { get; set; }
         [Required]
         public required Patient Patient { get; set; }
+        [ForeignKey("NurseID")]
         public int? NurseID { get; set; }
         public User? Nurse { get; set; }
         [Column(TypeName = "decimal(5,2)")]
