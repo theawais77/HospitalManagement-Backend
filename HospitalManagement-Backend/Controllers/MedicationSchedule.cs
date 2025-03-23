@@ -20,19 +20,37 @@ namespace HospitalManagement_Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MedicationSchedule>>> GetMedicationSchedules()
         {
-            return await _dbcontext.MedicationSchedule.ToListAsync();
+
+            var medicationSchedules = await _dbcontext.MedicationSchedule
+      .Include(ms => ms.Prescription)
+          .ThenInclude(p => p!.Patient)  // Include Patient
+      .Include(ms => ms.Prescription)
+          .ThenInclude(p => p!.Medication)  // Include Medication
+      .Include(ms => ms.Nurse)  // Include Nurse
+      .ToListAsync();  // Use ToListAsync()
+
+
+            return Ok(medicationSchedules);
         }
 
         // GET: api/MedicationSchedule/5
         [HttpGet("{id}")]
         public async Task<ActionResult<MedicationSchedule>> GetMedicationSchedule(int id)
         {
-            var medicationSchedule = await _dbcontext.MedicationSchedule.FindAsync(id);
+            var medicationSchedule = await _dbcontext.MedicationSchedule
+      .Include(ms => ms.Prescription)
+          .ThenInclude(p => p!.Patient)  // Include Patient
+      .Include(ms => ms.Prescription)
+          .ThenInclude(p => p!.Medication)  // Include Medication
+      .Include(ms => ms.Nurse)  // Include Nurse
+                .FirstOrDefaultAsync(ms => ms.ScheduleID == id);
+
             if (medicationSchedule == null)
             {
                 return NotFound();
             }
-            return medicationSchedule;
+
+            return Ok(medicationSchedule);
         }
 
         // POST: api/MedicationSchedule
