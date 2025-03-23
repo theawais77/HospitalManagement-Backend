@@ -7,13 +7,15 @@ namespace HospitalManagement_Backend.Models
     {
         [Key]
         public int RecordID { get; set; }
-        [ForeignKey("PatientID")]
-        public int PatientID { get; set; }
-        [Required]
-        public required Patient Patient { get; set; }
-        [ForeignKey("DoctorID")]
+
+        [ForeignKey("Patient")]
+        public int? PatientID { get; set; }
+        public Patient? Patient { get; set; }
+
+        [ForeignKey("Doctor")]
         public int? DoctorID { get; set; }
         public User? Doctor { get; set; }
+
         [Required]
         public required string Diagnosis { get; set; }
         [Required]
