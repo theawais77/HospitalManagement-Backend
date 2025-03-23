@@ -20,19 +20,29 @@ namespace HospitalManagement_Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<NurseAssignment>>> GetNurseAssignments()
         {
-            return await _dbcontext.NurseAssignments.ToListAsync();
+            var nurseAssignments = await _dbcontext.NurseAssignments
+                .Include(na => na.Nurse)   // Include Nurse details
+                .Include(na => na.Patient) // Include Patient details
+                .ToListAsync();
+
+            return Ok(nurseAssignments);
         }
 
         // GET: api/NurseAssignments/5
         [HttpGet("{id}")]
         public async Task<ActionResult<NurseAssignment>> GetNurseAssignment(int id)
         {
-            var nurseAssignment = await _dbcontext.NurseAssignments.FindAsync(id);
+            var nurseAssignment = await _dbcontext.NurseAssignments
+                .Include(na => na.Nurse)   // Include Nurse details
+                .Include(na => na.Patient) // Include Patient details
+                .FirstOrDefaultAsync(na => na.AssignmentID == id);
+
             if (nurseAssignment == null)
             {
                 return NotFound();
             }
-            return nurseAssignment;
+
+            return Ok(nurseAssignment);
         }
 
         // POST: api/NurseAssignments
