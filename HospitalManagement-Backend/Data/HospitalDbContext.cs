@@ -14,6 +14,6 @@ namespace HospitalManagement_Backend.Data
         public DbSet<Prescription> Prescriptions { get; set; }
         public DbSet<Vital> Vitals { get; set; }
         public DbSet<NurseAssignment> NurseAssignments { get; set; }
-        public DbSet<MedicationSchedule> MedicationSchedules { get; set; }
+        public DbSet<MedicationSchedule> MedicationSchedule { get; set; }
     }
 }
