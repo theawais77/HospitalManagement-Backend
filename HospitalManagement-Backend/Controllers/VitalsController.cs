@@ -18,13 +18,20 @@ namespace HospitalManagement_Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Vital>>> GetVitals()
         {
-            var vitals = await _dbcontext.Vitals.ToListAsync();
+            var vitals = await _dbcontext.Vitals
+                .Include(v => v.Patient)
+                .Include(v => v.Nurse)
+                .ToListAsync();
             return Ok(vitals);
         }
         [HttpGet("id")]
         public async Task<ActionResult<Vital>> GetVital(int id)
         {
-            var vital = await _dbcontext.Vitals.FindAsync(id);
+            var vital = await _dbcontext.Vitals
+                .Include(v => v.Patient)
+                .Include(v => v.Nurse)
+                .FirstOrDefaultAsync(v => v.VitalID == id);
+
             if (vital == null)
             {
                 return NotFound();

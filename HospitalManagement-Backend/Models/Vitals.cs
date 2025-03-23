@@ -9,8 +9,8 @@ namespace HospitalManagement_Backend.Models
         public int VitalID { get; set; }
         [ForeignKey("PatientID")]
         public int? PatientID { get; set; }
-        [Required]
-        public required Patient Patient { get; set; }
+        
+        public  Patient? Patient { get; set; }
         [ForeignKey("NurseID")]
         public int? NurseID { get; set; }
         public User? Nurse { get; set; }
