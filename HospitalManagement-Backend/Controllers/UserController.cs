@@ -4,6 +4,7 @@ using HospitalManagement_Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
+using Microsoft.AspNetCore.Identity.Data;
 
 namespace HospitalManagement_Backend.Controllers
 {
@@ -54,6 +55,35 @@ namespace HospitalManagement_Backend.Controllers
             await _dbcontext.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetAction), new { id = user.UserID }, userDTO);
+        }
+
+        [HttpPost("login")]
+        public async Task<ActionResult<UserResponse>> Login([FromBody] DTO.LoginRequest request)
+        {
+            var user = await _dbcontext.Users
+                .FirstOrDefaultAsync(u => u.Username == request.Username);
+
+            if (user == null)
+            {
+                return Unauthorized("Invalid username or password");
+            }
+
+            // Verify password using BCrypt
+            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            {
+                return Unauthorized("Invalid username or password");
+            }
+
+            // Create response without sensitive data
+            var response = new UserResponse
+            {
+                UserID = user.UserID,
+                Username = user.Username,
+                FullName = user.FullName,
+                Role = user.Role
+            };
+
+            return Ok(response);
         }
 
         [HttpPut("{id}")] 
