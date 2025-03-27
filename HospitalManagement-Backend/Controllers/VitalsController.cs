@@ -38,6 +38,22 @@ namespace HospitalManagement_Backend.Controllers
             }
             return Ok(vital);
         }
+        [HttpGet("patient/{patientId}")]
+        public async Task<ActionResult<IEnumerable<Vital>>> GetVitalsByPatient(int patientId)
+        {
+            var vitals = await _dbcontext.Vitals
+                .Include(v => v.Patient)
+                .Where(v => v.PatientID == patientId)
+                .OrderByDescending(v => v.RecordedAt)
+                .ToListAsync();
+
+            if (vitals == null || !vitals.Any())
+            {
+                return Ok(new List<Vital>()); // Return empty list rather than NotFound
+            }
+
+            return Ok(vitals);
+        }
         [HttpPost]
         public async Task<ActionResult<Vital>> AddVital(Vital vital)
         {
