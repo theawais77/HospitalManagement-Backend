@@ -45,6 +45,17 @@ namespace HospitalManagement_Backend.Controllers
             return medicalRecords;
 
         }
+        [HttpGet("patient/{patientId}")]
+        public async Task<ActionResult<IEnumerable<MedicalRecord>>> GetMedicalRecordsByPatient(int patientId)
+        {
+            var records = await _dbcontext.MedicalRecords
+                .Include(m => m.Patient)
+                .Where(m => m.PatientID == patientId)
+                .OrderByDescending(m => m.CreatedAt)
+                .ToListAsync();
+
+            return Ok(records);
+        }
 
         // POST: api/MedicalRecords
         [HttpPost]

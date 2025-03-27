@@ -40,7 +40,18 @@ namespace HospitalManagement_Backend.Controllers
             if (prescription == null) return NotFound();
             return prescription;
         }
+        [HttpGet("patient/{patientId}")]
+        public async Task<ActionResult<IEnumerable<Prescription>>> GetPrescriptionsByPatient(int patientId)
+        {
+            var prescriptions = await _dbcontext.Prescriptions
+                .Include(p => p.Patient)
+                .Include(p => p.Medication)
+                .Where(p => p.PatientID == patientId)
+                .OrderByDescending(p => p.PrescribedAt)
+                .ToListAsync();
 
+            return Ok(prescriptions);
+        }
         [HttpPost]
         public async Task<ActionResult<Prescription>> CreatePrescription([FromBody] Prescription prescription)
         {
