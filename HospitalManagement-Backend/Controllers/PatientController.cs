@@ -40,7 +40,7 @@ namespace HospitalManagement_Backend.Controllers
             await _dbcontext.SaveChangesAsync();
             return CreatedAtAction(nameof(GetPatient), new { id = patient.PatientID }, patient);
         }
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         public async Task<ActionResult<Patient>> UpdatePatient(int id, Patient patient)
         {
             if (id != patient.PatientID)
