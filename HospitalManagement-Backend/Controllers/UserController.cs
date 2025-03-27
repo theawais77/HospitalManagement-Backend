@@ -3,7 +3,7 @@ using HospitalManagement_Backend.DTO;
 using HospitalManagement_Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using HospitalManagement_Backend.Reposiories;
+using BCrypt.Net;
 
 namespace HospitalManagement_Backend.Controllers
 {
@@ -34,14 +34,17 @@ namespace HospitalManagement_Backend.Controllers
             }
             return Ok(user);
         }
+
         [HttpPost]
         public async Task<ActionResult<UserDTO>> AddUser(UserDTO userDTO)
         {
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(userDTO.Password);
+
             var user = new User
             {
                 UserID = userDTO.UserID,
                 Username = userDTO.Username,
-                PasswordHash = userDTO.PasswordHash, // You need to handle password hashing
+                PasswordHash = hashedPassword,
                 FullName = userDTO.FullName,
                 Role = userDTO.Role,
                 CreatedAt = userDTO.CreatedAt
@@ -50,10 +53,10 @@ namespace HospitalManagement_Backend.Controllers
             _dbcontext.Users.Add(user);
             await _dbcontext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetAction), new { id = user.UserID }, userDTO);//for front end to know the location of the created user
+            return CreatedAtAction(nameof(GetAction), new { id = user.UserID }, userDTO);
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id}")] 
         public async Task<ActionResult<UserDTO>> UpdateUser(int id, UserDTO userDTO)
         {
             if (id != userDTO.UserID)
@@ -65,14 +68,22 @@ namespace HospitalManagement_Backend.Controllers
             {
                 return NotFound();
             }
+            string hashedPassword = user.PasswordHash;
+            if (userDTO.Password != null && !BCrypt.Net.BCrypt.Verify(userDTO.Password, user.PasswordHash))
+            {
+                hashedPassword = BCrypt.Net.BCrypt.HashPassword(userDTO.Password);
+            }
+
             user.Username = userDTO.Username;
-            user.PasswordHash = userDTO.PasswordHash; // You need to handle password hashing
+            user.PasswordHash = hashedPassword;
             user.FullName = userDTO.FullName;
             user.Role = userDTO.Role;
             user.CreatedAt = userDTO.CreatedAt;
 
+            await _dbcontext.SaveChangesAsync(); 
             return NoContent();
         }
+
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteUser(int id)
         {
@@ -84,9 +95,6 @@ namespace HospitalManagement_Backend.Controllers
             _dbcontext.Users.Remove(user);
             await _dbcontext.SaveChangesAsync();
             return NoContent();
-           
-
         }
-
     }
 }
